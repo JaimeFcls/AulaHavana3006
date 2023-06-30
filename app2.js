@@ -1,9 +1,12 @@
 const express = require('express');
 const app = express();
 const port = 3000;
-const bodyParser = require('body-parser');
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 //
 const Sequelize = require('sequelize')
+const {Op} = require('sequelize')
 
 const Produto = require('./model/Produto')
 
@@ -23,7 +26,6 @@ sequelize.authenticate().then(function () {
 
 //
 app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', (req, res) => {
   res.send('E aê!!');
@@ -40,14 +42,43 @@ app.post('/cadastroProduto', (req, res) => {
 
   res.send(mensagem);
 });
+app.post('/atualizaProduto', express.urlencoded({ extended: true }), (req, res) => {
+  var valorAtual = req.body.valor;
+  var idProduto = req.body.id;
+  Produto.Produto.update({ valor: valorAtual }, {
+    where: {
+      id: idProduto
+    }
+  }).then(function() {
+    console.log("Alteração realizada com sucesso");
+    res.send("Alteração realizada com sucesso");
+  }).catch(function(erro) {
+    console.log("Erro na alteração: " + erro);
+    res.send("Erro na alteração");
+  });
+});
+
 
 app.get("/buscaProdutos",(req,res)=>{
-  var codigoProcurado = req.query.codigo;
+  var nomeProduto = req.query.nome;
+  var valorProduto = req.query.valor;
   Produto.Produto.findAll({
-    where:{id:codigoProcurado}
+    where:{
+      [Op.and]: [{nome: nomeProduto}, {valor: valorProduto }]
   }
-  ).
-      then(function(produtos){
+  }).
+  then(function(produtos){
+    console.log(produtos);
+    
+    res.send(produtos)
+  }). 
+  catch(function(erro){
+    console.log('Erro na busca'+erro);
+    res.send("Erro na busca")
+  })
+})
+ /* */
+  /*then(function(produtos){
         console.log(produtos);
         var tabela = ''
         for(var i = 0;i< produtos.length;i++){
@@ -63,7 +94,8 @@ app.get("/buscaProdutos",(req,res)=>{
         console.log('Erro na busca'+erro);
         res.send("Erro na busca")
       })
-})
+    })*/
+
 
 app.listen(port, () => {
   console.log(`Esta aplicação está escutando a porta ${port}`);
