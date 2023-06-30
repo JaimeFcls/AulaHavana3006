@@ -3,11 +3,11 @@ const app = express();
 const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-//
 const Sequelize = require('sequelize')
 const {Op} = require('sequelize')
 
+app.set('view engine', 'ejs');
+app.set('views', './views');
 const Produto = require('./model/Produto')
 
 const sequelize = new Sequelize('lojinha', 'aluno', 'ifpe2023', {
@@ -28,8 +28,8 @@ sequelize.authenticate().then(function () {
 app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  res.send('E aê!!');
-});
+  res.render('home');
+ }); 
 
 app.post('/cadastroProduto', (req, res) => {
   var valorRecebido = req.body.valor;
@@ -73,30 +73,30 @@ app.post('/atualizaProduto', express.urlencoded({ extended: true }), (req, res) 
 });
 
 
-app.get("/buscaProdutos",(req,res)=>{
+app.get("/buscaProdutos", (req, res) => {
   var nomeProduto = req.query.nome;
   var valorProduto = req.query.valor;
-  Produto.Produto.findAll({
-    where:{
-      [Op.and]: [{nome: nomeProduto}, {valor: valorProduto }]
-  }
-  }).then(function(produtos){
-        console.log(produtos);
-        var tabela = "<table>";
-        for(var i = 0;i< produtos.length;i++){
-          tabela+=" Id :"+produtos[i]['id'];
-          tabela+=" Nome :"+produtos[i]['nome'];
-          tabela+=" Valor :"+produtos[i]['valor'];
-          tabela+="<br>";
-        }
-        console.log(tabela);
-        res.send(tabela)
-      }). 
-      catch(function(erro){
-        console.log('Erro na busca'+erro);
-        res.send("Erro na busca")
-      })
-    })
+  Produto.findAll({
+    where: {
+      [Op.and]: [{ nome: nomeProduto }, { valor: valorProduto }]
+    }
+  }).then(function (produtos) {
+    console.log(produtos);
+    var tabela = "<table>";
+    for (var i = 0; i < produtos.length; i++) {
+      tabela += " Id :" + produtos[i]['id'];
+      tabela += " Nome :" + produtos[i]['nome'];
+      tabela += " Valor :" + produtos[i]['valor'];
+      tabela += "<br>";
+    }
+    tabela += "</table>";
+    console.log(tabela);
+    res.send(tabela);
+  }).catch(function (erro) {
+    console.log('Erro na busca: ' + erro);
+    res.send("Erro na busca");
+  });
+});
 
 app.listen(port, () => {
   console.log(`Esta aplicação está escutando a porta ${port}`);
