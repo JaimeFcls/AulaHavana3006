@@ -42,6 +42,20 @@ app.post('/cadastroProduto', (req, res) => {
 
   res.send(mensagem);
 });
+app.post('/excluiProduto', express.urlencoded({ extended: true }), (req, res) => {
+  var idProduto = req.body.id;
+  Produto.Produto.destroy({
+    where: {
+      id: idProduto
+    }
+  }).then(function() {
+    console.log("Excluido com sucesso");
+    res.send("Excluido com sucesso");
+  }).catch(function(erro) {
+    console.log("Erro na alteração: " + erro);
+    res.send("Erro na alteração");
+  });
+});
 app.post('/atualizaProduto', express.urlencoded({ extended: true }), (req, res) => {
   var valorAtual = req.body.valor;
   var idProduto = req.body.id;
@@ -66,21 +80,9 @@ app.get("/buscaProdutos",(req,res)=>{
     where:{
       [Op.and]: [{nome: nomeProduto}, {valor: valorProduto }]
   }
-  }).
-  then(function(produtos){
-    console.log(produtos);
-    
-    res.send(produtos)
-  }). 
-  catch(function(erro){
-    console.log('Erro na busca'+erro);
-    res.send("Erro na busca")
-  })
-})
- /* */
-  /*then(function(produtos){
+  }).then(function(produtos){
         console.log(produtos);
-        var tabela = ''
+        var tabela = "<table>";
         for(var i = 0;i< produtos.length;i++){
           tabela+=" Id :"+produtos[i]['id'];
           tabela+=" Nome :"+produtos[i]['nome'];
@@ -94,8 +96,7 @@ app.get("/buscaProdutos",(req,res)=>{
         console.log('Erro na busca'+erro);
         res.send("Erro na busca")
       })
-    })*/
-
+    })
 
 app.listen(port, () => {
   console.log(`Esta aplicação está escutando a porta ${port}`);
